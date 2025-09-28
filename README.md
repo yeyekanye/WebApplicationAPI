@@ -1,1 +1,3 @@
-# WebApplicationAPI
+# ASP .NET WEB API
+
+Домашні завдання по цій темі, поки є тільки вступ
