@@ -15,52 +15,36 @@ namespace WebApplicationAPI.Controllers
             _repository = repository;
         }
 
-        // ✅ Отримати всі ігри
         [HttpGet]
-        public async Task<IActionResult> GetAll()
-        {
-            var games = await _repository.GetAllAsync();
-            return Ok(games);
-        }
+        public async Task<IActionResult> GetAll() =>
+            Ok(await _repository.GetAllAsync());
 
-        // ✅ Отримати гру за Id
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
             var game = await _repository.GetByIdAsync(id);
-            if (game == null) return NotFound();
-            return Ok(game);
+            return game == null ? NotFound() : Ok(game);
         }
 
-        // ✅ Отримати ігри за категорією (жанром)
-        [HttpGet("category/{category}")]
-        public async Task<IActionResult> GetByCategory(string category)
-        {
-            var games = await _repository.GetByGenreAsync(category);
-            return Ok(games);
-        }
+        [HttpGet("genre/{genre}")]
+        public async Task<IActionResult> GetByGenre(string genre) =>
+            Ok(await _repository.GetByGenreAsync(genre));
 
-        // ✅ Створити гру
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Game game)
+        public async Task<IActionResult> Create(Game game)
         {
             var created = await _repository.CreateAsync(game);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
-        // ✅ Оновити гру
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] Game game)
+        public async Task<IActionResult> Update(int id, Game game)
         {
-            if (id != game.Id) return BadRequest("Id in URL and body must match");
-
+            if (id != game.Id) return BadRequest();
             var updated = await _repository.UpdateAsync(game);
-            if (updated == null) return NotFound();
-
-            return Ok(updated);
+            return updated == null ? NotFound() : Ok(updated);
         }
 
-        // ✅ Видалити гру
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
