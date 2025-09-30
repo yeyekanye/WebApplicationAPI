@@ -1,5 +1,5 @@
-﻿using DAL.Entities;
-using DAL.Repositories.Interfaces;
+﻿using Application.DTOs;
+using Application.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebApplicationAPI.Controllers
@@ -8,63 +8,48 @@ namespace WebApplicationAPI.Controllers
     [Route("api/[controller]")]
     public class GamesController : ControllerBase
     {
-        private readonly IGameRepository _repository;
+        private readonly IGameService _service;
 
-        public GamesController(IGameRepository repository)
+        public GamesController(IGameService service)
         {
-            _repository = repository;
+            _service = service;
         }
 
-        // ✅ Отримати всі ігри
         [HttpGet]
-        public async Task<IActionResult> GetAll()
-        {
-            var games = await _repository.GetAllAsync();
-            return Ok(games);
-        }
+        public async Task<IActionResult> GetAll() =>
+            Ok(await _service.GetAllAsync());
 
-        // ✅ Отримати гру за Id
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var game = await _repository.GetByIdAsync(id);
-            if (game == null) return NotFound();
-            return Ok(game);
+            var game = await _service.GetByIdAsync(id);
+            return game == null ? NotFound() : Ok(game);
         }
 
-        // ✅ Отримати ігри за категорією (жанром)
-        [HttpGet("category/{category}")]
-        public async Task<IActionResult> GetByCategory(string category)
-        {
-            var games = await _repository.GetByGenreAsync(category);
-            return Ok(games);
-        }
+        [HttpGet("genre/{genre}")]
+        public async Task<IActionResult> GetByGenre(string genre) =>
+            Ok(await _service.GetByGenreAsync(genre));
 
-        // ✅ Створити гру
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Game game)
+        public async Task<IActionResult> Create(GameCreateDto dto)
         {
-            var created = await _repository.CreateAsync(game);
+            var created = await _service.CreateAsync(dto);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
-        // ✅ Оновити гру
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] Game game)
+        public async Task<IActionResult> Update(int id, GameUpdateDto dto)
         {
-            if (id != game.Id) return BadRequest("Id in URL and body must match");
+            if (id != dto.Id) return BadRequest("Id mismatch");
 
-            var updated = await _repository.UpdateAsync(game);
-            if (updated == null) return NotFound();
-
-            return Ok(updated);
+            var updated = await _service.UpdateAsync(dto);
+            return updated == null ? NotFound() : Ok(updated);
         }
 
-        // ✅ Видалити гру
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var deleted = await _repository.DeleteAsync(id);
+            var deleted = await _service.DeleteAsync(id);
             return deleted ? NoContent() : NotFound();
         }
     }
