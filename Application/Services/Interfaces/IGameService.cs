@@ -1,14 +1,15 @@
 ﻿using Application.DTOs;
+using Application.Common;
 
 namespace Application.Services.Interfaces
 {
     public interface IGameService
     {
-        Task<GameDto> CreateAsync(GameCreateDto dto);
-        Task<GameDto?> UpdateAsync(GameUpdateDto dto);
-        Task<bool> DeleteAsync(int id);
-        Task<IEnumerable<GameDto>> GetAllAsync();
-        Task<GameDto?> GetByIdAsync(int id);
-        Task<IEnumerable<GameDto>> GetByGenreAsync(string genre);
+        Task<ServiceResponse<GameDto>> CreateAsync(GameCreateDto dto);
+        Task<ServiceResponse<GameDto>> UpdateAsync(GameUpdateDto dto);
+        Task<ServiceResponse<bool>> DeleteAsync(int id);
+        Task<ServiceResponse<IEnumerable<GameDto>>> GetAllAsync();
+        Task<ServiceResponse<GameDto>> GetByIdAsync(int id);
+        Task<ServiceResponse<IEnumerable<GameDto>>> GetByGenreAsync(string genre);
     }
 }

@@ -16,41 +16,50 @@ namespace WebApplicationAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll() =>
-            Ok(await _service.GetAllAsync());
+        public async Task<IActionResult> GetAll()
+        {
+            var response = await _service.GetAllAsync();
+            return response.Success ? Ok(response) : BadRequest(response);
+        }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var game = await _service.GetByIdAsync(id);
-            return game == null ? NotFound() : Ok(game);
+            var response = await _service.GetByIdAsync(id);
+            return response.Success ? Ok(response) : NotFound(response);
         }
 
         [HttpGet("genre/{genre}")]
-        public async Task<IActionResult> GetByGenre(string genre) =>
-            Ok(await _service.GetByGenreAsync(genre));
+        public async Task<IActionResult> GetByGenre(string genre)
+        {
+            var response = await _service.GetByGenreAsync(genre);
+            return response.Success ? Ok(response) : NotFound(response);
+        }
 
         [HttpPost]
         public async Task<IActionResult> Create(GameCreateDto dto)
         {
-            var created = await _service.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+            var response = await _service.CreateAsync(dto);
+            return response.Success
+                ? CreatedAtAction(nameof(GetById), new { id = response.Data!.Id }, response)
+                : BadRequest(response);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, GameUpdateDto dto)
         {
-            if (id != dto.Id) return BadRequest("Id mismatch");
+            if (id != dto.Id)
+                return BadRequest(new { Message = "Id mismatch" });
 
-            var updated = await _service.UpdateAsync(dto);
-            return updated == null ? NotFound() : Ok(updated);
+            var response = await _service.UpdateAsync(dto);
+            return response.Success ? Ok(response) : NotFound(response);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var deleted = await _service.DeleteAsync(id);
-            return deleted ? NoContent() : NotFound();
+            var response = await _service.DeleteAsync(id);
+            return response.Success ? NoContent() : NotFound(response);
         }
     }
 }

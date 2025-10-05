@@ -2,6 +2,7 @@
 using Application.Services.Interfaces;
 using DAL.Entities;
 using DAL.Repositories.Interfaces;
+using Application.Common;
 
 namespace Application.Services
 {
@@ -14,7 +15,7 @@ namespace Application.Services
             _repository = repository;
         }
 
-        public async Task<GameDto> CreateAsync(GameCreateDto dto)
+        public async Task<ServiceResponse<GameDto>> CreateAsync(GameCreateDto dto)
         {
             var game = new Game
             {
@@ -26,16 +27,20 @@ namespace Application.Services
 
             var created = await _repository.CreateAsync(game);
 
-            return new GameDto
+            return new ServiceResponse<GameDto>
             {
-                Id = created.Id,
-                Title = created.Title,
-                Genre = created.Genre,
-                Price = created.Price
+                Data = new GameDto
+                {
+                    Id = created.Id,
+                    Title = created.Title,
+                    Genre = created.Genre,
+                    Price = created.Price
+                },
+                Message = "Game created successfully"
             };
         }
 
-        public async Task<GameDto?> UpdateAsync(GameUpdateDto dto)
+        public async Task<ServiceResponse<GameDto>> UpdateAsync(GameUpdateDto dto)
         {
             var game = new Game
             {
@@ -47,54 +52,103 @@ namespace Application.Services
             };
 
             var updated = await _repository.UpdateAsync(game);
-            if (updated == null) return null;
-
-            return new GameDto
+            if (updated == null)
             {
-                Id = updated.Id,
-                Title = updated.Title,
-                Genre = updated.Genre,
-                Price = updated.Price
+                return new ServiceResponse<GameDto>
+                {
+                    Success = false,
+                    Message = $"Game with id {dto.Id} not found"
+                };
+            }
+
+            return new ServiceResponse<GameDto>
+            {
+                Data = new GameDto
+                {
+                    Id = updated.Id,
+                    Title = updated.Title,
+                    Genre = updated.Genre,
+                    Price = updated.Price
+                },
+                Message = "Game updated successfully"
             };
         }
 
-        public async Task<bool> DeleteAsync(int id) =>
-            await _repository.DeleteAsync(id);
+        public async Task<ServiceResponse<bool>> DeleteAsync(int id)
+        {
+            var deleted = await _repository.DeleteAsync(id);
 
-        public async Task<IEnumerable<GameDto>> GetAllAsync()
+            if (!deleted)
+            {
+                return new ServiceResponse<bool>
+                {
+                    Success = false,
+                    Message = $"Game with id {id} not found",
+                    Data = false
+                };
+            }
+
+            return new ServiceResponse<bool>
+            {
+                Data = true,
+                Message = "Game deleted successfully"
+            };
+        }
+
+        public async Task<ServiceResponse<IEnumerable<GameDto>>> GetAllAsync()
         {
             var games = await _repository.GetAllAsync();
-            return games.Select(g => new GameDto
+            return new ServiceResponse<IEnumerable<GameDto>>
             {
-                Id = g.Id,
-                Title = g.Title,
-                Genre = g.Genre,
-                Price = g.Price
-            });
-        }
-
-        public async Task<GameDto?> GetByIdAsync(int id)
-        {
-            var game = await _repository.GetByIdAsync(id);
-            return game == null ? null : new GameDto
-            {
-                Id = game.Id,
-                Title = game.Title,
-                Genre = game.Genre,
-                Price = game.Price
+                Data = games.Select(g => new GameDto
+                {
+                    Id = g.Id,
+                    Title = g.Title,
+                    Genre = g.Genre,
+                    Price = g.Price
+                })
             };
         }
 
-        public async Task<IEnumerable<GameDto>> GetByGenreAsync(string genre)
+        public async Task<ServiceResponse<GameDto>> GetByIdAsync(int id)
+        {
+            var game = await _repository.GetByIdAsync(id);
+            if (game == null)
+            {
+                return new ServiceResponse<GameDto>
+                {
+                    Success = false,
+                    Message = $"Game with id {id} not found"
+                };
+            }
+
+            return new ServiceResponse<GameDto>
+            {
+                Data = new GameDto
+                {
+                    Id = game.Id,
+                    Title = game.Title,
+                    Genre = game.Genre,
+                    Price = game.Price
+                }
+            };
+        }
+
+        public async Task<ServiceResponse<IEnumerable<GameDto>>> GetByGenreAsync(string genre)
         {
             var games = await _repository.GetByGenreAsync(genre);
-            return games.Select(g => new GameDto
+
+            return new ServiceResponse<IEnumerable<GameDto>>
             {
-                Id = g.Id,
-                Title = g.Title,
-                Genre = g.Genre,
-                Price = g.Price
-            });
+                Data = games.Select(g => new GameDto
+                {
+                    Id = g.Id,
+                    Title = g.Title,
+                    Genre = g.Genre,
+                    Price = g.Price
+                }),
+                Message = games.Any() ? "" : $"No games found with genre {genre}"
+            };
         }
     }
 }
