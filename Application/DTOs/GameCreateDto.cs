@@ -1,10 +1,10 @@
 ﻿namespace Application.DTOs
 {
-    public class GameCreateDto
+    public class CreateGameDto
     {
-        public string Title { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
         public string Genre { get; set; } = string.Empty;
-        public decimal Price { get; set; }
-        public DateTime ReleaseDate { get; set; }
+        public string ImageFolderPath { get; set; } = string.Empty;
     }
 }

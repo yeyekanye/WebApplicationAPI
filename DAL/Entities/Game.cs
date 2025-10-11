@@ -3,9 +3,11 @@
     public class Game
     {
         public int Id { get; set; }
-        public string Title { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
         public string Genre { get; set; } = string.Empty;
-        public decimal Price { get; set; }
-        public DateTime ReleaseDate { get; set; }
+
+        // 🆕 Шлях до папки із зображеннями гри
+        public string ImageFolderPath { get; set; } = string.Empty;
     }
 }
